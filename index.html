@@ -880,11 +880,17 @@
         }
         .form-status {
             margin-bottom: 16px;
-            font-size: 15px;
-            min-height: 1.4em;
+            padding: 12px 16px;
+            font-size: 14px;
+            min-height: 48px;
+            border-radius: 8px;
+            line-height: 1.5;
         }
-        .form-status.success { color: var(--accent); font-weight: 500; }
-        .form-status.error { color: #dc2626; }
+        .form-status:not(:empty) {
+            margin-top: 8px;
+        }
+        .form-status.success { color: #166534; background: #dcfce7; font-weight: 500; }
+        .form-status.error { color: #b91c1c; background: #fee2e2; }
 
         /* Footer */
         footer {
@@ -1337,58 +1343,74 @@
         </div>
     </footer>
 
-    <!-- URL API для формы (когда сайт на GitHub Pages — задеплойте api на Vercel и вставьте сюда ссылку) -->
-    <script>window.CONTACT_FORM_API_URL = '';</script>
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-        // Форма: отправка в Telegram. Для GitHub Pages укажите CONTACT_FORM_API_URL (см. выше).
+    <!-- URL API для формы: должен заканчиваться на /api/telegram (например https://uess-fivb.vercel.app/api/telegram) -->
+    <script>window.CONTACT_FORM_API_URL = 'https://uess-fivb.vercel.app/api/telegram';</script>
+    <script>
+        // Форма: отправка в Telegram
         (function() {
             var form = document.getElementById('contact-form');
             var statusEl = document.getElementById('form-status');
             var submitBtn = document.getElementById('submit-btn');
-            var apiUrl = window.CONTACT_FORM_API_URL || (form && form.getAttribute('data-api-url')) || '/api/telegram';
-            if (!form || !statusEl) return;
+            function show(msg, isError) {
+                if (!statusEl) return;
+                statusEl.textContent = msg;
+                statusEl.className = 'form-status ' + (isError ? 'error' : 'success');
+                statusEl.style.display = '';
+            }
+            if (!form || !statusEl) {
+                if (statusEl) show('Ошибка: форма не найдена в разметке.', true);
+                return;
+            }
+            var apiUrl = (window.CONTACT_FORM_API_URL || '').toString().replace(/\/+$/, '');
+            if (apiUrl && apiUrl.indexOf('/api/telegram') === -1) apiUrl = apiUrl + '/api/telegram';
+            if (!apiUrl) apiUrl = (form.getAttribute('data-api-url') || '').replace(/\/+$/, '') || null;
+            if (!apiUrl) apiUrl = '/api/telegram';
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
-                if (!apiUrl) {
-                    statusEl.textContent = 'Настройте CONTACT_FORM_API_URL (см. api/README.md).';
-                    statusEl.className = 'form-status error';
-                    return;
+                try {
+                    show('Отправка...', false);
+                    var data = {
+                        name: (form.querySelector('[name="name"]') || {}).value || '',
+                        phone: (form.querySelector('[name="phone"]') || {}).value || '',
+                        email: (form.querySelector('[name="email"]') || {}).value || '',
+                        message: (form.querySelector('[name="message"]') || {}).value || ''
+                    };
+                    submitBtn.disabled = true;
+                    fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    })
+                    .then(function(r) {
+                        var ct = (r.headers.get('Content-Type') || '');
+                        if (ct.indexOf('json') !== -1) {
+                            return r.json().then(function(j) { return { status: r.status, ok: r.ok, body: j }; });
+                        }
+                        return { status: r.status, ok: r.ok, body: {} };
+                    })
+                    .then(function(result) {
+                        if (result.ok && result.body && result.body.ok) {
+                            show('Заявка отправлена! Мы свяжемся с вами в ближайшее время.', false);
+                            form.reset();
+                        } else if (result.status === 404) {
+                            show('Ошибка 404: по адресу ' + apiUrl + ' нет API. Проверьте, что на Vercel задеплоен проект с папкой api/ и указан верный CONTACT_FORM_API_URL (например https://ваш-проект.vercel.app/api/telegram).', true);
+                        } else if (result.status === 500) {
+                            show('Ошибка сервера (500): ' + (result.body && result.body.error ? result.body.error : 'на Vercel не заданы TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID. Добавьте их в Settings → Environment Variables и сделайте Redeploy.'), true);
+                        } else {
+                            show((result.body && result.body.error) ? result.body.error : 'Ошибка ' + result.status + '. Попробуйте позже или позвоните: +7 (982) 310-77-00', true);
+                        }
+                    })
+                    .catch(function(err) {
+                        var msg = 'Не удалось отправить запрос. ';
+                        if (err && err.message) msg += 'Причина: ' + err.message + '. ';
+                        msg += 'Проверьте: 1) интернет; 2) что CONTACT_FORM_API_URL указан верно (https://ваш-проект.vercel.app/api/telegram); 3) что проект задеплоен на Vercel. Или позвоните: +7 (982) 310-77-00';
+                        show(msg, true);
+                    })
+                    .finally(function() { submitBtn.disabled = false; });
+                } catch (err) {
+                    show('Ошибка при отправке: ' + (err && err.message ? err.message : 'неизвестная ошибка'), true);
+                    submitBtn.disabled = false;
                 }
-                statusEl.textContent = 'Отправка...';
-                statusEl.className = 'form-status';
-                statusEl.style.display = '';
-                var data = {
-                    name: (form.querySelector('[name="name"]') || {}).value || '',
-                    phone: (form.querySelector('[name="phone"]') || {}).value || '',
-                    email: (form.querySelector('[name="email"]') || {}).value || '',
-                    message: (form.querySelector('[name="message"]') || {}).value || ''
-                };
-                submitBtn.disabled = true;
-                fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                })
-                .then(function(r) {
-                    var ct = r.headers.get('Content-Type') || '';
-                    if (ct.indexOf('json') !== -1) return r.json().then(function(j) { return { ok: r.ok, body: j }; });
-                    return { ok: r.ok, body: {} };
-                })
-                .then(function(result) {
-                    if (result.ok && result.body && result.body.ok) {
-                        statusEl.textContent = 'Заявка отправлена! Мы свяжемся с вами в ближайшее время.';
-                        statusEl.className = 'form-status success';
-                        form.reset();
-                    } else {
-                        statusEl.textContent = (result.body && result.body.error) ? result.body.error : 'Ошибка отправки. Попробуйте позже или позвоните: +7 (982) 310-77-00';
-                        statusEl.className = 'form-status error';
-                    }
-                })
-                .catch(function(err) {
-                    statusEl.textContent = 'Сервер недоступен. Укажите CONTACT_FORM_API_URL в коде (см. api/README.md) или позвоните: +7 (982) 310-77-00';
-                    statusEl.className = 'form-status error';
-                })
-                .finally(function() { submitBtn.disabled = false; });
             });
         })();
 
