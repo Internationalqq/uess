@@ -1281,7 +1281,7 @@
                 </div>
             </div>
             <div class="contact-form">
-                <form id="contact-form" action="javascript:void(0)" method="post">
+                <form id="contact-form" method="post" onsubmit="var s=document.getElementById('form-status'); if(s){ s.textContent='Отправка...'; s.className='form-status'; s.style.display=''; } return false;">
                     <div class="form-group">
                         <label>Ваше имя</label>
                         <input type="text" name="name" placeholder="Иван Иванов" required>
@@ -1346,8 +1346,7 @@
     <!-- URL API для формы: должен заканчиваться на /api/telegram (например https://uess-fivb.vercel.app/api/telegram) -->
     <script>window.CONTACT_FORM_API_URL = 'https://uess-fivb.vercel.app/api/telegram';</script>
     <script>
-        // Форма: отправка в Telegram
-        (function() {
+        document.addEventListener('DOMContentLoaded', function() {
             var form = document.getElementById('contact-form');
             var statusEl = document.getElementById('form-status');
             var submitBtn = document.getElementById('submit-btn');
@@ -1358,7 +1357,7 @@
                 statusEl.style.display = '';
             }
             if (!form || !statusEl) {
-                if (statusEl) show('Ошибка: форма не найдена в разметке.', true);
+                if (statusEl) show('Ошибка: форма не найдена.', true);
                 return;
             }
             var apiUrl = (window.CONTACT_FORM_API_URL || '').toString().replace(/\/+$/, '');
@@ -1412,7 +1411,7 @@
                     submitBtn.disabled = false;
                 }
             });
-        })();
+        });
 
         // Smooth scroll
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
