@@ -1375,6 +1375,10 @@
                         message: (form.querySelector('[name="message"]') || {}).value || ''
                     };
                     submitBtn.disabled = true;
+                    var timeout = setTimeout(function() {
+                        show('Сервер не отвечает. Проверьте: 1) URL API на Vercel; 2) в Vercel заданы TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID (Settings → Environment Variables → Redeploy).', true);
+                        submitBtn.disabled = false;
+                    }, 15000);
                     fetch(apiUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -1383,26 +1387,30 @@
                     .then(function(r) {
                         var ct = (r.headers.get('Content-Type') || '');
                         if (ct.indexOf('json') !== -1) {
-                            return r.json().then(function(j) { return { status: r.status, ok: r.ok, body: j }; });
+                            return r.json()
+                                .then(function(j) { return { status: r.status, ok: r.ok, body: j }; })
+                                .catch(function() { return { status: r.status, ok: false, body: {} }; });
                         }
                         return { status: r.status, ok: r.ok, body: {} };
                     })
                     .then(function(result) {
+                        clearTimeout(timeout);
                         if (result.ok && result.body && result.body.ok) {
                             show('Заявка отправлена! Мы свяжемся с вами в ближайшее время.', false);
                             form.reset();
                         } else if (result.status === 404) {
-                            show('Ошибка 404: по адресу ' + apiUrl + ' нет API. Проверьте, что на Vercel задеплоен проект с папкой api/ и указан верный CONTACT_FORM_API_URL (например https://ваш-проект.vercel.app/api/telegram).', true);
+                            show('Ошибка 404: по адресу нет API. Убедитесь, что на Vercel задеплоен этот репозиторий с папкой api/ и в настройках указан домен. URL должен быть: https://uess-fivb.vercel.app/api/telegram', true);
                         } else if (result.status === 500) {
-                            show('Ошибка сервера (500): ' + (result.body && result.body.error ? result.body.error : 'на Vercel не заданы TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID. Добавьте их в Settings → Environment Variables и сделайте Redeploy.'), true);
+                            show('Ошибка сервера (500): ' + (result.body && result.body.error ? result.body.error : 'На Vercel не заданы TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID. Зайдите в проект → Settings → Environment Variables, добавьте их и сделайте Redeploy.'), true);
                         } else {
-                            show((result.body && result.body.error) ? result.body.error : 'Ошибка ' + result.status + '. Попробуйте позже или позвоните: +7 (982) 310-77-00', true);
+                            show((result.body && result.body.error) ? result.body.error : 'Ошибка ' + result.status + '. Позвоните нам: +7 (982) 310-77-00', true);
                         }
                     })
                     .catch(function(err) {
-                        var msg = 'Не удалось отправить запрос. ';
-                        if (err && err.message) msg += 'Причина: ' + err.message + '. ';
-                        msg += 'Проверьте: 1) интернет; 2) что CONTACT_FORM_API_URL указан верно (https://ваш-проект.vercel.app/api/telegram); 3) что проект задеплоен на Vercel. Или позвоните: +7 (982) 310-77-00';
+                        clearTimeout(timeout);
+                        var msg = 'Запрос не прошёл. ';
+                        if (err && err.message) msg += err.message + ' ';
+                        msg += 'Часто так бывает из‑за CORS: сайт на GitHub Pages, а API на Vercel. Проверьте, что проект uess задеплоен на Vercel (не только на GitHub) и в нём есть папка api/. В Vercel: Settings → Environment Variables → TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID → Redeploy.';
                         show(msg, true);
                     })
                     .finally(function() { submitBtn.disabled = false; });

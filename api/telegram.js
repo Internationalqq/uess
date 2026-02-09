@@ -13,25 +13,33 @@ module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Content-Type', 'application/json');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
 
   if (req.method !== 'POST') {
-    return res.status(405).json({ ok: false, error: 'Только POST' });
+    return res.status(405).send(JSON.stringify({ ok: false, error: 'Только POST' }));
   }
 
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
 
   if (!token || !chatId) {
-    console.error('Не заданы TELEGRAM_BOT_TOKEN или TELEGRAM_CHAT_ID');
-    return res.status(500).json({ ok: false, error: 'Сервер не настроен' });
+    return res.status(500).send(JSON.stringify({
+      ok: false,
+      error: 'На Vercel не заданы TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID. Settings → Environment Variables → Redeploy.'
+    }));
   }
 
   try {
-    const { name, phone, email, message } = req.body || {};
+    let body = req.body;
+    if (typeof body === 'string') {
+      try { body = JSON.parse(body); } catch (_) { body = {}; }
+    }
+    if (!body || typeof body !== 'object') body = {};
+    const { name, phone, email, message } = body;
     const text = [
       '🆕 <b>Новая заявка с сайта УЭСС</b>',
       '',
@@ -54,13 +62,17 @@ module.exports = async function handler(req, res) {
 
     const data = await response.json();
     if (!data.ok) {
-      console.error('Telegram API error:', data);
-      return res.status(500).json({ ok: false, error: data.description || 'Ошибка отправки' });
+      return res.status(500).send(JSON.stringify({
+        ok: false,
+        error: data.description || 'Telegram отклонил сообщение'
+      }));
     }
 
-    return res.status(200).json({ ok: true });
+    return res.status(200).send(JSON.stringify({ ok: true }));
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ ok: false, error: 'Ошибка сервера' });
+    return res.status(500).send(JSON.stringify({
+      ok: false,
+      error: err.message || 'Ошибка сервера'
+    }));
   }
 };
