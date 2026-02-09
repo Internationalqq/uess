@@ -1281,7 +1281,7 @@
                 </div>
             </div>
             <div class="contact-form">
-                <form id="contact-form" method="post" onsubmit="var s=document.getElementById('form-status'); if(s){ s.textContent='Отправка...'; s.className='form-status'; s.style.display=''; } return false;">
+                <form id="contact-form" method="post" onsubmit="return false;">
                     <div class="form-group">
                         <label>Ваше имя</label>
                         <input type="text" name="name" placeholder="Иван Иванов" required>
@@ -1299,7 +1299,7 @@
                         <textarea name="message" placeholder="Расскажите о вашем проекте"></textarea>
                     </div>
                     <div id="form-status" class="form-status" aria-live="polite"></div>
-                    <button type="submit" class="submit-btn" id="submit-btn">Отправить заявку</button>
+                    <button type="button" class="submit-btn" id="submit-btn" onclick="if(window.sendContactForm) window.sendContactForm(); else { var s=document.getElementById('form-status'); if(s){ s.textContent='Скрипт не загружен. Обновите страницу (F5).'; s.className='form-status error'; } }">Отправить заявку</button>
                 </form>
             </div>
         </div>
@@ -1343,95 +1343,90 @@
         </div>
     </footer>
 
-    <!-- URL API для формы: должен заканчиваться на /api/telegram (например https://uess-fivb.vercel.app/api/telegram) -->
     <script>window.CONTACT_FORM_API_URL = 'https://uess-fivb.vercel.app/api/telegram';</script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var form = document.getElementById('contact-form');
-            var statusEl = document.getElementById('form-status');
-            var submitBtn = document.getElementById('submit-btn');
-            function show(msg, isError) {
-                if (!statusEl) return;
-                statusEl.textContent = msg;
-                statusEl.className = 'form-status ' + (isError ? 'error' : 'success');
-                statusEl.style.display = '';
-            }
-            if (!form || !statusEl) {
-                if (statusEl) show('Ошибка: форма не найдена.', true);
-                return;
-            }
-            var apiUrl = (window.CONTACT_FORM_API_URL || '').toString().replace(/\/+$/, '');
-            if (apiUrl && apiUrl.indexOf('/api/telegram') === -1) apiUrl = apiUrl + '/api/telegram';
-            if (!apiUrl) apiUrl = (form.getAttribute('data-api-url') || '').replace(/\/+$/, '') || null;
-            if (!apiUrl) apiUrl = '/api/telegram';
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                try {
-                    show('Отправка...', false);
-                    var data = {
-                        name: (form.querySelector('[name="name"]') || {}).value || '',
-                        phone: (form.querySelector('[name="phone"]') || {}).value || '',
-                        email: (form.querySelector('[name="email"]') || {}).value || '',
-                        message: (form.querySelector('[name="message"]') || {}).value || ''
-                    };
-                    submitBtn.disabled = true;
-                    var timeout = setTimeout(function() {
-                        show('Сервер не отвечает. Проверьте: 1) URL API на Vercel; 2) в Vercel заданы TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID (Settings → Environment Variables → Redeploy).', true);
-                        submitBtn.disabled = false;
-                    }, 15000);
-                    fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(data)
-                    })
-                    .then(function(r) {
-                        var ct = (r.headers.get('Content-Type') || '');
-                        if (ct.indexOf('json') !== -1) {
-                            return r.json()
-                                .then(function(j) { return { status: r.status, ok: r.ok, body: j }; })
-                                .catch(function() { return { status: r.status, ok: false, body: {} }; });
-                        }
-                        return { status: r.status, ok: r.ok, body: {} };
-                    })
-                    .then(function(result) {
-                        clearTimeout(timeout);
-                        if (result.ok && result.body && result.body.ok) {
-                            show('Заявка отправлена! Мы свяжемся с вами в ближайшее время.', false);
-                            form.reset();
-                        } else if (result.status === 404) {
-                            show('Ошибка 404: по адресу нет API. Убедитесь, что на Vercel задеплоен этот репозиторий с папкой api/ и в настройках указан домен. URL должен быть: https://uess-fivb.vercel.app/api/telegram', true);
-                        } else if (result.status === 500) {
-                            show('Ошибка сервера (500): ' + (result.body && result.body.error ? result.body.error : 'На Vercel не заданы TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID. Зайдите в проект → Settings → Environment Variables, добавьте их и сделайте Redeploy.'), true);
-                        } else {
-                            show((result.body && result.body.error) ? result.body.error : 'Ошибка ' + result.status + '. Позвоните нам: +7 (982) 310-77-00', true);
-                        }
-                    })
-                    .catch(function(err) {
-                        clearTimeout(timeout);
-                        var msg = 'Запрос не прошёл. ';
-                        if (err && err.message) msg += err.message + ' ';
-                        msg += 'Часто так бывает из‑за CORS: сайт на GitHub Pages, а API на Vercel. Проверьте, что проект uess задеплоен на Vercel (не только на GitHub) и в нём есть папка api/. В Vercel: Settings → Environment Variables → TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID → Redeploy.';
-                        show(msg, true);
-                    })
-                    .finally(function() { submitBtn.disabled = false; });
-                } catch (err) {
-                    show('Ошибка при отправке: ' + (err && err.message ? err.message : 'неизвестная ошибка'), true);
-                    submitBtn.disabled = false;
+        try {
+            window.sendContactForm = function() {
+                var form = document.getElementById('contact-form');
+                var statusEl = document.getElementById('form-status');
+                var btn = document.getElementById('submit-btn');
+                function show(msg, err) {
+                    if (!statusEl) return;
+                    statusEl.textContent = msg;
+                    statusEl.className = 'form-status ' + (err ? 'error' : 'success');
+                    statusEl.style.display = 'block';
+                    statusEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 }
-            });
-        });
+                if (!form || !statusEl) {
+                    show('Ошибка: не найдены форма или блок для сообщений.', true);
+                    return;
+                }
+                var apiUrl = (window.CONTACT_FORM_API_URL || '').toString().trim().replace(/\/+$/, '');
+                if (!apiUrl) apiUrl = '/api/telegram';
+                else if (apiUrl.indexOf('/api/telegram') === -1) apiUrl = apiUrl + '/api/telegram';
+                var nameEl = form.querySelector('[name="name"]');
+                var phoneEl = form.querySelector('[name="phone"]');
+                if (nameEl && !nameEl.value.trim()) { show('Введите имя.', true); nameEl.focus(); return; }
+                if (phoneEl && !phoneEl.value.trim()) { show('Введите телефон.', true); phoneEl.focus(); return; }
+                show('Отправка...', false);
+                if (btn) btn.disabled = true;
+                var data = {
+                    name: (form.querySelector('[name="name"]') || {}).value || '',
+                    phone: (form.querySelector('[name="phone"]') || {}).value || '',
+                    email: (form.querySelector('[name="email"]') || {}).value || '',
+                    message: (form.querySelector('[name="message"]') || {}).value || ''
+                };
+                var done = false;
+                var t = setTimeout(function() {
+                    if (done) return;
+                    done = true;
+                    show('Нет ответа за 15 сек. Проверьте Vercel: TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID заданы? Redeploy?', true);
+                    if (btn) btn.disabled = false;
+                }, 15000);
+                fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                }).then(function(r) {
+                    return r.text().then(function(txt) {
+                        var body = {};
+                        try { body = txt ? JSON.parse(txt) : {}; } catch (_) {}
+                        return { status: r.status, body: body };
+                    });
+                }).then(function(r) {
+                    if (done) return;
+                    done = true;
+                    clearTimeout(t);
+                    if (r.status === 200 && r.body && r.body.ok) {
+                        show('Заявка отправлена! Мы свяжемся с вами.', false);
+                        form.reset();
+                    } else if (r.status === 404) {
+                        show('Ошибка 404: API не найден. На Vercel задеплойте репозиторий с папкой api/ и telegram.js.', true);
+                    } else if (r.status === 500) {
+                        show('Ошибка сервера: ' + (r.body && r.body.error ? r.body.error : 'Задайте TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID в Vercel → Redeploy.'), true);
+                    } else {
+                        show((r.body && r.body.error) || 'Ошибка ' + r.status, true);
+                    }
+                }).catch(function(e) {
+                    if (done) return;
+                    done = true;
+                    clearTimeout(t);
+                    show('Ошибка сети: ' + (e.message || 'не удалось отправить') + '. URL: ' + apiUrl, true);
+                }).finally(function() { if (btn) btn.disabled = false; });
+            };
+        } catch (e) {
+            window.sendContactForm = function() {
+                var s = document.getElementById('form-status');
+                if (s) { s.textContent = 'Ошибка загрузки скрипта: ' + (e.message || e); s.className = 'form-status error'; }
+            };
+        }
 
         // Smooth scroll
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
+        document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+            anchor.addEventListener('click', function(e) {
                 e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
+                var target = document.querySelector(this.getAttribute('href'));
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
             });
         });
 
