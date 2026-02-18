@@ -13,7 +13,7 @@
     <header>
         <div class="header-container">
             <div class="logo">УЭСС</div>
-            <nav>
+            <nav class="desktop-nav">
                 <ul>
                     <li><a href="#services">Услуги</a></li>
                     <li><a href="#about">О компании</a></li>
@@ -21,18 +21,30 @@
                 </ul>
             </nav>
             <a href="#contact" class="header-cta">Связаться</a>
+            <button class="mobile-menu-toggle" aria-label="Меню">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
         </div>
+        <nav class="mobile-nav">
+            <ul>
+                <li><a href="#services">Услуги</a></li>
+                <li><a href="#about">О компании</a></li>
+                <li><a href="#contact">Контакты</a></li>
+            </ul>
+        </nav>
     </header>
 
     <section class="hero">
         <div class="hero-container">
             <div class="hero-content">
-                <div>
+                <div class="hero-top">
                     <span class="hero-label">Строительство и проектирование</span>
-                    <span style="position: absolute; right: -200px;">
-                        <h2 style="color: white;">Работаем с физическими и юридическими лицами</h2>
+                    <div class="hero-info">
+                        <h2 class="hero-subtitle">Работаем с физическими и юридическими лицами</h2>
                         <a href="tel:+79823107700" class="hero-phone">+7 (982) 310-77-00</a>
-                    </span>
+                    </div>
                 </div>
                 <h1>Создаём пространства для жизни и бизнеса</h1>
                 <p>Универсал Эко Строй Сервис — комплексные решения в области строительства индивидуальных домов и промышленных объектов.</p>
