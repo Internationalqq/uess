@@ -108,17 +108,29 @@ header::before {
 }
 
 .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     font-size: 36px;
     font-weight: 700;
     color: var(--dark);
     letter-spacing: -1px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.logo-img {
+    height: 90px;
+    width: auto;
+    object-fit: contain;
+    display: block;
+}
+
+.logo span {
     background: linear-gradient(135deg, var(--dark) 0%, var(--dark-gray) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    position: relative;
-    transition: all 0.3s ease;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .logo::after {
@@ -297,7 +309,7 @@ nav a:hover::before {
 }
 
 .hero-content {
-    max-width: 800px;
+    max-width: 1200px;
     width: 100%;
     box-sizing: border-box;
 }
@@ -309,7 +321,7 @@ nav a:hover::before {
     margin-bottom: 32px;
     gap: 40px;
     width: 100%;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
 }
 
 .hero-label {
@@ -323,6 +335,7 @@ nav a:hover::before {
     letter-spacing: 0.5px;
     text-transform: uppercase;
     flex-shrink: 0;
+    white-space: nowrap;
 }
 
 .hero-info {
@@ -331,6 +344,9 @@ nav a:hover::before {
     align-items: flex-end;
     gap: 12px;
     flex-shrink: 0;
+    margin-left: auto;
+    min-width: fit-content;
+    text-align: right;
 }
 
 .hero-subtitle {
@@ -340,6 +356,7 @@ nav a:hover::before {
     margin: 0;
     text-align: right;
     line-height: 1.4;
+    white-space: nowrap;
 }
 
 .hero h1 {
@@ -1303,7 +1320,9 @@ footer {
     .hero-container {
         padding: 0 40px;
     }
+}
 
+@media (max-width: 768px) {
     .hero-top {
         flex-direction: column;
         align-items: flex-start;
@@ -1314,6 +1333,7 @@ footer {
     .hero-info {
         align-items: flex-start;
         width: 100%;
+        margin-left: 0;
     }
 
     .hero-subtitle {
@@ -1419,8 +1439,17 @@ footer {
         max-width: 100%;
     }
 
+    .header-container {
+        display: flex;
+        justify-content: space-between;
+    }
+    
     .logo {
         font-size: 26px;
+    }
+    
+    .logo-img {
+        height: 70px;
     }
 
     .desktop-nav {
@@ -1514,6 +1543,7 @@ footer {
 
     .hero-info {
         width: 100%;
+        margin-left: 0;
     }
 
     .hero-subtitle {
@@ -1693,6 +1723,12 @@ footer {
         height: 70px;
         padding: 0 16px;
         max-width: 100%;
+        display: flex;
+        justify-content: space-between;
+    }
+    
+    .logo-img {
+        height: 60px;
     }
 
     .hero-container {
@@ -1832,5 +1868,31 @@ footer {
 
     footer {
         padding: 48px 16px 24px;
+    }
+}
+
+/* ФИКС: Гарантируем правильное расположение hero-top на десктопе */
+@media (min-width: 1025px) {
+    .hero-top {
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        flex-wrap: nowrap !important;
+    }
+    
+    .hero-info {
+        margin-left: auto !important;
+        align-items: flex-end !important;
+        width: auto !important;
+        text-align: right !important;
+    }
+    
+    .hero-subtitle {
+        text-align: right !important;
+        white-space: nowrap !important;
+    }
+    
+    .hero-label {
+        flex-shrink: 0 !important;
+        white-space: nowrap !important;
     }
 }

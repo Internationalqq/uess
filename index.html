@@ -4,15 +4,53 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>УЭСС – Профессиональное строительство</title>
+    <meta name="description" content="УЭСС (Универсал Эко Строй Сервис) — строительство ИЖС, промышленных зданий, металлоконструкции. Челябинская область, Миасс. Работаем с физлицами и юрлицами.">
+    <meta name="keywords" content="строительство ИЖС, строительство домов Миасс, металлоконструкции, УЭСС, Челябинская область">
+    <link rel="canonical" href="https://uess-fivb.vercel.app/">
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://uess-fivb.vercel.app/">
+    <meta property="og:title" content="УЭСС – Профессиональное строительство">
+    <meta property="og:description" content="Строительство ИЖС и промышленных объектов. Челябинская область. Универсал Эко Строй Сервис.">
+    <meta property="og:locale" content="ru_RU">
+    <meta property="og:site_name" content="УЭСС">
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="УЭСС – Профессиональное строительство">
+    <meta name="twitter:description" content="Строительство ИЖС и промышленных объектов. Челябинская область.">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/main.css">
+    <style>
+        /* ФИКС: hero-top на десктопе - элементы в строку, hero-info справа */
+        @media (min-width: 769px) {
+            .hero-top {
+                display: flex !important;
+                flex-direction: row !important;
+                justify-content: space-between !important;
+                align-items: flex-start !important;
+                flex-wrap: nowrap !important;
+            }
+            .hero-info {
+                margin-left: auto !important;
+                align-items: flex-end !important;
+                width: auto !important;
+                text-align: right !important;
+            }
+            .hero-subtitle {
+                text-align: right !important;
+            }
+        }
+    </style>
 </head>
 <body>
     <script>window.CONTACT_FORM_API_URL = 'https://uess-fivb.vercel.app/api/telegram';</script>
     <script src="contact-form.js"></script>
     <header>
         <div class="header-container">
-            <div class="logo">УЭСС</div>
+            <div class="logo">
+                <img src="images/logo.png" alt="УЭСС" class="logo-img">
+                <span>УЭСС</span>
+            </div>
             <nav class="desktop-nav">
                 <ul>
                     <li><a href="#services">Услуги</a></li>
@@ -109,8 +147,7 @@
                     </div>
                     <div class="service-card-content">
                         <h3>Сдаем технику в аренду</h3>
-                        <p>Трактор — 3 500₽/час с учетом НДС. Аренда на долгий срок от полугода.</p>
-                        <div class="service-price">от 3 500₽/час</div>
+                        <p>Сдаем в аренду технику на длительный срок. Подробности и стоимость уточняйте по телефону.</p>
                     </div>
                 </div>
             </div>
