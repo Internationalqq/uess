@@ -7,6 +7,7 @@
 html {
     overflow-x: hidden;
     width: 100%;
+    scroll-behavior: smooth;
 }
 
 img {
@@ -1896,3 +1897,104 @@ footer {
         white-space: nowrap !important;
     }
 }
+
+/* Плавное появление секций при скролле */
+.reveal {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.55s ease-out, transform 0.55s ease-out;
+}
+
+.reveal.reveal-in-view {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Лёгкий stagger для карточек и фич */
+.reveal .service-card,
+.reveal .feature-item {
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.45s ease-out, transform 0.45s ease-out;
+}
+.reveal.reveal-in-view .service-card,
+.reveal.reveal-in-view .feature-item {
+    opacity: 1;
+    transform: translateY(0);
+}
+.reveal.reveal-in-view .service-card:nth-child(1) { transition-delay: 0.05s; }
+.reveal.reveal-in-view .service-card:nth-child(2) { transition-delay: 0.1s; }
+.reveal.reveal-in-view .service-card:nth-child(3) { transition-delay: 0.15s; }
+.reveal.reveal-in-view .service-card:nth-child(4) { transition-delay: 0.2s; }
+.reveal.reveal-in-view .feature-item:nth-child(1) { transition-delay: 0.05s; }
+.reveal.reveal-in-view .feature-item:nth-child(2) { transition-delay: 0.12s; }
+.reveal.reveal-in-view .feature-item:nth-child(3) { transition-delay: 0.19s; }
+.reveal.reveal-in-view .feature-item:nth-child(4) { transition-delay: 0.26s; }
+
+/* Hero: текст и кнопки по очереди при загрузке */
+.reveal.hero .hero-label,
+.reveal.hero .hero-top,
+.reveal.hero .hero-content > h1,
+.reveal.hero .hero-content > p,
+.reveal.hero .hero-buttons {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+.reveal.hero.reveal-in-view .hero-label { opacity: 1; transform: translateY(0); transition-delay: 0.05s; }
+.reveal.hero.reveal-in-view .hero-top { opacity: 1; transform: translateY(0); transition-delay: 0.1s; }
+.reveal.hero.reveal-in-view .hero-content > h1 { opacity: 1; transform: translateY(0); transition-delay: 0.18s; }
+.reveal.hero.reveal-in-view .hero-content > p { opacity: 1; transform: translateY(0); transition-delay: 0.26s; }
+.reveal.hero.reveal-in-view .hero-buttons { opacity: 1; transform: translateY(0); transition-delay: 0.34s; }
+
+/* Секция Услуги: заголовок, описание, блок "Прочие услуги" */
+.reveal .section-header,
+.reveal .services-other {
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.45s ease-out, transform 0.45s ease-out;
+}
+.reveal.reveal-in-view .section-header { opacity: 1; transform: translateY(0); transition-delay: 0.02s; }
+.reveal.reveal-in-view .services-other { opacity: 1; transform: translateY(0); transition-delay: 0.35s; }
+
+/* О компании: текст сверху */
+.reveal .about-content {
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.45s ease-out, transform 0.45s ease-out;
+}
+.reveal.reveal-in-view .about-content { opacity: 1; transform: translateY(0); transition-delay: 0.02s; }
+
+/* Coverage: карта и текст */
+.reveal .coverage-image,
+.reveal .coverage-content {
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+.reveal.reveal-in-view .coverage-image { opacity: 1; transform: translateY(0); transition-delay: 0.05s; }
+.reveal.reveal-in-view .coverage-content { opacity: 1; transform: translateY(0); transition-delay: 0.12s; }
+
+/* Контакты: инфо и форма */
+.reveal .contact-info,
+.reveal .contact-form {
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.45s ease-out, transform 0.45s ease-out;
+}
+.reveal.reveal-in-view .contact-info { opacity: 1; transform: translateY(0); transition-delay: 0.05s; }
+.reveal.reveal-in-view .contact-form { opacity: 1; transform: translateY(0); transition-delay: 0.15s; }
+
+/* Footer: блоки и низ */
+.reveal .footer-about,
+.reveal .footer-links,
+.reveal .footer-bottom {
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.45s ease-out, transform 0.45s ease-out;
+}
+.reveal.reveal-in-view .footer-about { opacity: 1; transform: translateY(0); transition-delay: 0.05s; }
+.reveal.reveal-in-view .footer-content > .footer-links:nth-child(2) { opacity: 1; transform: translateY(0); transition-delay: 0.1s; }
+.reveal.reveal-in-view .footer-content > .footer-links:nth-child(3) { opacity: 1; transform: translateY(0); transition-delay: 0.15s; }
+.reveal.reveal-in-view .footer-content > .footer-links:nth-child(4) { opacity: 1; transform: translateY(0); transition-delay: 0.2s; }
+.reveal.reveal-in-view .footer-bottom { opacity: 1; transform: translateY(0); transition-delay: 0.3s; }
